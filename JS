@@ -1,13 +1,83 @@
-const inputBox  =document.getElementById("input-box");
-const listcontainer =document.getElementById("list-container");
+const inputBox = document.getElementById("input-box");
+const addBtn = document.getElementById("add-btn");
+const listContainer = document.getElementById("list-container");
+
+const totalTasks = document.getElementById("total-tasks");
+const completedTasks = document.getElementById("completed-tasks");
+const pendingTasks = document.getElementById("pending-tasks");
+
+// Add Task
 function addTask(){
-    if(inputBox.value === ''){
-        alert("You Must Write Something!");
+    if(inputBox.value.trim() === ''){
+        alert("You must write something!");
+        return;
     }
-    else{
-        let li=document.createElement("li");
-        li.innerHTML=inputBox.value;
-        listcontainer.appendChild(li);
-    }
-    inputBox.value='';
+
+    let li = document.createElement("li");
+    li.textContent = inputBox.value;
+
+    let span = document.createElement("span");
+    span.innerHTML = "\u00d7"; // × delete symbol
+    li.appendChild(span);
+
+    listContainer.appendChild(li);
+    inputBox.value = "";
+
+    saveData();
+    updateCounter();
 }
+
+// Button Click
+addBtn.addEventListener("click", addTask);
+
+// Enter Key
+inputBox.addEventListener("keypress", function(e){
+    if(e.key === "Enter"){
+        addTask();
+    }
+});
+
+// Toggle & Delete
+listContainer.addEventListener("click", function(e){
+    if(e.target.tagName === "LI"){
+        e.target.classList.toggle("checked");
+        saveData();
+        updateCounter();
+    }
+    else if(e.target.tagName === "SPAN"){
+        e.target.parentElement.remove();
+        saveData();
+        updateCounter();
+    }
+});
+
+// Save to LocalStorage
+function saveData(){
+    localStorage.setItem("tasks", listContainer.innerHTML);
+}
+
+// Show Saved Tasks
+function showTask(){
+    listContainer.innerHTML = localStorage.getItem("tasks") || "";
+    updateCounter();
+}
+
+// Update Counter
+function updateCounter(){
+    const tasks = listContainer.getElementsByTagName("li");
+    const total = tasks.length;
+
+    let completed = 0;
+
+    for(let i = 0; i < tasks.length; i++){
+        if(tasks[i].classList.contains("checked")){
+            completed++;
+        }
+    }
+
+    totalTasks.textContent = total;
+    completedTasks.textContent = completed;
+    pendingTasks.textContent = total - completed;
+}
+
+showTask();
